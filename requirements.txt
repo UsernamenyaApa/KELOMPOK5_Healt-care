@@ -1,0 +1,6 @@
+strawberry-graphql[fastapi]
+uvicorn
+sqlalchemy
+pymysql
+pydantic
+requests

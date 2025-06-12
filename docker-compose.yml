@@ -1,0 +1,132 @@
+version: '3'
+
+services:
+  # Database services
+  db-patient:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: patient_db
+    volumes:
+      - patient_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+
+  db-doctor:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: doctor_db
+    volumes:
+      - doctor_data:/var/lib/mysql
+    ports:
+      - "3308:3306"
+
+  db-appointment:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: appointment_db
+    volumes:
+      - appointment_data:/var/lib/mysql
+    ports:
+      - "3309:3306"
+
+  db-medicine:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: medicine_db
+    volumes:
+      - medicine_data:/var/lib/mysql
+    ports:
+      - "3310:3306"
+
+  # Backend services
+  patient-service:
+    build:
+      context: .
+      dockerfile: ./patient_service/Dockerfile
+    ports:
+      - "8001:8001"
+    depends_on:
+      - db-patient
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:password@db-patient:3306/patient_db
+      - RUN_SEEDER=false  # Ubah menjadi true jika ingin menjalankan seeder
+
+  doctor-service:
+    build:
+      context: .
+      dockerfile: ./doctor_service/Dockerfile
+    ports:
+      - "8002:8002"
+    depends_on:
+      - db-doctor
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:password@db-doctor:3306/doctor_db
+      - RUN_SEEDER=false  # Ubah menjadi true jika ingin menjalankan seeder
+
+  appointment-service:
+    build:
+      context: .
+      dockerfile: ./appointment_service/Dockerfile
+    ports:
+      - "8003:8003"
+    depends_on:
+      - db-appointment
+      - patient-service
+      - doctor-service
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:password@db-appointment:3306/appointment_db
+      - RUN_SEEDER=false  # Ubah menjadi true jika ingin menjalankan seeder
+
+  medicine-service:
+    build:
+      context: .
+      dockerfile: ./medicine_service/Dockerfile
+    ports:
+      - "8004:8004"
+    depends_on:
+      - db-medicine
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:password@db-medicine:3306/medicine_db
+      - RUN_SEEDER=false  # Ubah menjadi true jika ingin menjalankan seeder
+
+  chat-service:
+    build:
+      context: .
+      dockerfile: ./chat_service/Dockerfile
+    ports:
+      - "8005:8005"
+    depends_on:
+      - db-patient
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:password@db-patient:3306/patient_db
+      - RUN_SEEDER=false  # Ubah menjadi true jika ingin menjalankan seeder
+
+  # Frontend service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - patient-service
+      - doctor-service
+      - appointment-service
+      - medicine-service
+      - chat-service
+    environment:
+      - REACT_APP_PATIENT_SERVICE=http://localhost:8001
+      - REACT_APP_DOCTOR_SERVICE=http://localhost:8002
+      - REACT_APP_APPOINTMENT_SERVICE=http://localhost:8003
+      - REACT_APP_MEDICINE_SERVICE=http://localhost:8004
+      - REACT_APP_CHAT_SERVICE=http://localhost:8005
+
+volumes:
+  patient_data:
+  doctor_data:
+  appointment_data:
+  medicine_data:
