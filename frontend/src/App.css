@@ -1,0 +1,43 @@
+body, html, .app-container {
+  background: #f8f6ff;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 32px;
+  background: #fff;
+  box-shadow: 0 2px 8px #e7e3fc;
+}
+.logo {
+  font-weight: bold;
+  font-size: 1.3rem;
+  color: #6c63ff;
+}
+nav a {
+  margin: 0 12px;
+  text-decoration: none;
+  color: #666;
+  font-weight: 500;
+}
+.book-btn {
+  background: #a78bfa;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: background 0.2s;
+}
+.book-btn:hover {
+  background: #6c63ff;
+}
+main {
+  padding: 32px 0 0 0;
+}
