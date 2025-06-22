@@ -3,8 +3,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Import dari parent directory
-from .. import models
-from ..database import engine, Base
+import models
+from database import engine, Base
 
 def run_seed():
     # Hapus semua data dan buat tabel baru

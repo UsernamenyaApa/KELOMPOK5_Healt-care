@@ -72,7 +72,7 @@ const PatientPortal = () => {
                       <button onClick={() => setShowMedicineId(a.id)}>Lihat Resep</button>
                       {showMedicineId === a.id && (
                         <Modal onClose={() => setShowMedicineId(null)}>
-                          <Medicine appointmentId={a.id} isDoctor={false} />
+                          <Medicine appointmentId={a.id} isDoctor={false} patientId={selected.id} />
                           <button onClick={() => setShowMedicineId(null)} style={{marginTop: 16}}>Tutup</button>
                         </Modal>
                       )}

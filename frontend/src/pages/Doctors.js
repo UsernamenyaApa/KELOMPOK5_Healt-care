@@ -25,7 +25,8 @@ const Doctors = () => {
 
   const handleSelect = (doc) => {
     setSelected(doc);
-    const apptQuery = `query($doctorId: Int!) { doctorAppointments(doctorId: $doctorId) { id patient_id schedule } }`;
+    // Ubah patient_id menjadi patientId di sini
+    const apptQuery = `query($doctorId: Int!) { doctorAppointments(doctorId: $doctorId) { id patientId schedule } }`;
     graphqlFetch(DOCTOR_GQL, apptQuery, { doctorId: doc.id }).then(data => setAppointments(data.doctorAppointments));
   };
 
@@ -45,7 +46,7 @@ const Doctors = () => {
     <h4>Appointment</h4>
     {appointments.length === 0 ? <p>Tidak ada appointment.</p> : appointments.map(a => (
   <div key={a.id} className="appointment-card">
-    <p><b>Pasien ID:</b> {a.patient_id}</p>
+    <p><b>Pasien ID:</b> {a.patientId}</p>
     <p><b>Jadwal:</b> {a.schedule}</p>
     <button onClick={() => setShowMedicineId(a.id)}>Beri Resep</button>
     {showMedicineId === a.id && (

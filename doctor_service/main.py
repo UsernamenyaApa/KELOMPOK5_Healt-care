@@ -2,7 +2,8 @@ import strawberry
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from . import models, database
+import models
+import database
 import requests
 from typing import List, Optional
 
@@ -17,6 +18,7 @@ app.add_middleware(
 )
 
 models.Base.metadata.create_all(bind=database.engine)
+
 
 
 APPOINTMENT_SERVICE_URL = "http://appointment-service:8003/appointments"

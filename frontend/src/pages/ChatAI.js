@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8004/chat';
+const API_URL = 'http://localhost:8005/chat';
 
 const ChatAI = () => {
   const [messages, setMessages] = useState([]);

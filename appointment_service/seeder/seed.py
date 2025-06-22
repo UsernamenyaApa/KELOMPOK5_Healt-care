@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 import random
 
 # Import dari parent directory
-from .. import models
-from ..database import engine, Base
+import models
+from database import engine, Base
 
 def run_seed():
     # Hapus semua data dan buat tabel baru

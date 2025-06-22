@@ -2,7 +2,8 @@ import strawberry
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from . import models, database
+import models
+import database
 from typing import List, Optional
 
 app = FastAPI()

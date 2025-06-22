@@ -3,8 +3,11 @@ from pydantic import BaseModel
 from typing import List
 import random
 from fastapi.middleware.cors import CORSMiddleware
-from .database import SessionLocal
-from .models import Doctor
+import database
+import models 
+# Tambahkan import berikut
+from database import SessionLocal
+from models import Doctor
 
 app = FastAPI()
 

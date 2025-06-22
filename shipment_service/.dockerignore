@@ -1,0 +1,55 @@
+# Exclude version control files
+.git
+.gitignore
+.gitattributes
+
+# Exclude environment files
+.env
+.env.*
+!.env.example
+
+# Exclude development files
+.editorconfig
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+
+# Exclude node modules and related files
+/node_modules
+package-lock.json
+yarn.lock
+npm-debug.log
+yarn-error.log
+
+# Exclude storage and cache files
+/storage/*.key
+/storage/pail
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/bootstrap/cache/*
+
+# Exclude build files
+/public/build
+/public/hot
+/public/storage
+
+# Exclude test files
+/tests
+phpunit.xml
+
+# Exclude documentation
+README.md
+CHANGELOG.md
+LICENSE.md
+
+# Exclude other unnecessary files
+*.log
+.DS_Store
+Thumbs.db

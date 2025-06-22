@@ -1,0 +1,54 @@
+# Menggunakan official PHP image versi 8.2 dengan FPM sebagai dasar.
+# FPM (FastCGI Process Manager) adalah pilihan yang direkomendasikan untuk production.
+FROM php:8.2-fpm
+
+# Menetapkan direktori kerja utama di dalam kontainer.
+# Semua perintah selanjutnya akan dijalankan dari path ini.
+WORKDIR /var/www
+
+# Menginstal dependensi sistem yang dibutuhkan oleh Laravel dan PHP.
+# Termasuk library untuk kompresi gambar, koneksi database, dan lain-lain.
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    locales \
+    zip \
+    jpegoptim optipng pngquant gifsicle \
+    vim \
+    unzip \
+    git \
+    curl \
+    libonig-dev \
+    libxml2-dev
+
+# Menginstal ekstensi-ekstensi PHP yang penting untuk Laravel.
+# pdo_mysql: untuk koneksi ke database MySQL.
+# gd: untuk manipulasi gambar.
+# bcmath: untuk kalkulasi presisi.
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd xml
+
+# Menginstal Composer secara global di dalam image.
+# Composer diambil dari image resmi Composer untuk memastikan versi yang stabil.
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Menyalin seluruh file proyek dari komputer lokal Anda ke dalam direktori kerja kontainer.
+COPY . .
+
+# Menjalankan 'composer install' untuk menginstal semua package PHP dari file composer.json.
+# Opsi --no-dev digunakan untuk production agar package development tidak diinstal.
+# Opsi --optimize-autoloader meningkatkan performa autoloader.
+RUN composer install --no-interaction --optimize-autoloader --no-dev
+
+# Mengubah kepemilikan semua file proyek menjadi milik user 'www-data'.
+# Ini penting agar server web (PHP-FPM) memiliki izin untuk menulis file log, cache, dan session.
+RUN chown -R www-data:www-data /var/www
+
+# Memberitahu Docker bahwa kontainer ini akan mendengarkan koneksi pada port 8000.
+EXPOSE 9000
+
+# Perintah default yang akan dijalankan saat kontainer dimulai.
+# Menggunakan format "Exec" (array JSON) yang direkomendasikan Docker untuk menghindari warning
+# dan memastikan proses shutdown yang lebih 'graceful'.
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=9000"]

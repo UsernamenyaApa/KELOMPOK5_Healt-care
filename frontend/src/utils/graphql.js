@@ -11,3 +11,6 @@ export async function graphqlFetch(url, query, variables = {}) {
   if (json.errors) throw new Error(json.errors.map(e => e.message).join(', '));
   return json.data;
 }
+
+// Tambahkan konstanta untuk URL Shipment Service
+export const SHIPMENT_GQL = 'http://localhost:8006/graphql';

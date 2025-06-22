@@ -2,14 +2,19 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
+# Copy requirements.txt dari folder service ini ke /app
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy semua file dari folder service ini (appointment_service) ke /app
+# Ini akan menyalin main.py, models.py, seeder/, entrypoint.sh, database.py dll.
 COPY . /app/
 
-# Script untuk menjalankan aplikasi dengan opsi seeding
-COPY ./appointment_service/entrypoint.sh /app/
-RUN chmod +x /app/appointment_service/entrypoint.sh
+# Sesuaikan path entrypoint.sh, karena sekarang ada di root /app
+COPY entrypoint.sh /app/
+RUN chmod +x /app/entrypoint.sh
 
-CMD ["/app/appointment_service/entrypoint.sh"]
-CMD ["uvicorn", "appointment_service.main:app", "--host", "0.0.0.0", "--port", "8003"]
+# Hanya gunakan satu CMD, yaitu menjalankan entrypoint script
+CMD ["/app/entrypoint.sh"]
+# Baris ini dihapus/dikomentari
+# CMD ["uvicorn", "appointment_service.main:app", "--host", "0.0.0.0", "--port", "800X"] # Port diasumsikan 8003

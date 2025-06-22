@@ -11,7 +11,9 @@ const PATIENT_GQL = 'http://localhost:8001/graphql';
 
 const Appointments = () => {
   const [showMedicine, setShowMedicine] = useState({ visible: false, appointmentId: null });
-  const [form, setForm] = useState({ patient_id: '', specialization: '', doctor_id: '', schedule: '' });
+  // Ubah snake_case menjadi camelCase
+  const [form, setForm] = useState({ patientId: '', specialization: '', doctorId: '', schedule: '' });
+  
   const [doctors, setDoctors] = useState([]);
   const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
@@ -23,7 +25,7 @@ const Appointments = () => {
 
   useEffect(() => {
     // Fetch doctors
-    const doctorQuery = `query { doctors { id name specialization } }`;
+    const doctorQuery = `query { doctors { id name specialization } }`; 
     graphqlFetch(DOCTOR_GQL, doctorQuery).then(data => {
       setDoctors(data.doctors);
       setSpecializations([...new Set(data.doctors.map(doc => doc.specialization))]);
@@ -122,7 +124,7 @@ const Appointments = () => {
     <div className="appointments-section">
       <h2>Jadwalkan Appointment</h2>
       <form onSubmit={handleSubmit} className="appointment-form">
-        <select name="patient_id" value={form.patient_id} onChange={handleChange} required>
+        <select name="patientId" value={form.patientId} onChange={handleChange} required>
           <option value="">Pilih Pasien</option>
           {patients.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
@@ -130,7 +132,7 @@ const Appointments = () => {
           <option value="">Pilih Spesialisasi</option>
           {specializations.map(sp => <option key={sp} value={sp}>{sp}</option>)}
         </select>
-        <select name="doctor_id" value={form.doctor_id} onChange={handleChange} required>
+        <select name="doctorId" value={form.doctorId} onChange={handleChange} required>
           <option value="">Pilih Dokter</option>
           {filteredDoctors.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select>

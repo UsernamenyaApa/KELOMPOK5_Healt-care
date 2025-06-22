@@ -3,9 +3,10 @@
 # Jalankan seeder jika RUN_SEEDER=true
 if [ "$RUN_SEEDER" = "true" ]; then
     echo "Menjalankan seeder untuk doctor service..."
-    python -m doctor_service.seeder.seed
+    # Path modul Python ini sekarang langsung dari root /app
+    python -m seeder.seed # Perhatikan: doctor_service.seeder.seed menjadi seeder.seed
     echo "Seeder selesai!"
 fi
 
 # Jalankan aplikasi
-exec uvicorn doctor_service.main:app --host 0.0.0.0 --port 8002
+exec uvicorn main:app --host 0.0.0.0 --port 8002 # Perhatikan: doctor_service.main:app menjadi main:app

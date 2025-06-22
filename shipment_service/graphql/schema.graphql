@@ -1,0 +1,99 @@
+# Mendefinisikan tipe data khusus untuk tanggal dan waktu
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+# Tipe data utama di dalam service ini
+type Shipment {
+    id: ID!
+    order_id: ID!
+    user_id: ID!
+    tracking_number: String
+    carrier: String
+    status: String!
+    shipping_address: String!
+    estimated_delivery: DateTime
+    created_at: DateTime!
+    updated_at: DateTime!
+
+    "Relasi ke riwayat pembaruan status (data lokal)."
+    updates: [ShipmentUpdate!] @hasMany
+
+    "Relasi ke data order (diambil dari order_service)."
+    order: Order @field(resolver: "App\\GraphQL\\Resolvers\\ShipmentResolver@order")
+}
+
+# Tipe data untuk riwayat update status pengiriman
+type ShipmentUpdate {
+    id: ID!
+    shipment_id: ID!
+    status: String!
+    location: String
+    description: String
+    created_at: DateTime!
+}
+
+# --- Tipe Data Representasi dari Microservice Lain ---
+
+# Representasi data dari order_service
+type Order {
+    id: ID!
+    status: String!
+    total_amount: Float!
+    "Relasi ke data user (diambil dari user_service, melalui data order)."
+    user: User @field(resolver: "App\\GraphQL\\Resolvers\\ShipmentResolver@user")
+}
+
+# Representasi data dari user_service
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    addresses: [Address!]
+}
+
+type Address {
+    street: String!
+    city: String!
+    zip_code: String!
+}
+
+
+# --- Kueri yang Tersedia ---
+
+type Query {
+    "1. Mengambil semua data pengiriman."
+    shipments: [Shipment!]! @all
+
+    "2. Mengambil satu data pengiriman berdasarkan ID-nya."
+    shipment(id: ID!): Shipment @field(resolver: "App\\GraphQL\\Resolvers\\ShipmentResolver@byId")
+
+    "3. Mengambil data pengiriman berdasarkan ID Order."
+    shipmentsByOrder(order_id: ID!): [Shipment!] @field(resolver: "App\\GraphQL\\Resolvers\\ShipmentResolver@byOrder")
+
+    "4. Mengambil semua pengiriman milik satu user."
+    shipmentsByUser(user_id: ID!): [Shipment!] @field(resolver: "App\\GraphQL\\Resolvers\\ShipmentResolver@byUser")
+}
+
+
+# --- Mutasi yang Tersedia ---
+
+type Mutation {
+    "1. Membuat pengiriman baru untuk sebuah order."
+    createShipment(
+        order_id: ID!
+        user_id: ID!
+        carrier: String
+        tracking_number: String
+    ): Shipment @field(resolver: "App\\GraphQL\\Resolvers\\ShipmentResolver@create")
+
+    "2. Memperbarui status sebuah pengiriman."
+    updateShipmentStatus(
+        id: ID!
+        status: String!
+        location: String
+        description: String
+        estimated_delivery: DateTime
+    ): Shipment @field(resolver: "App\\GraphQL\\Resolvers\\ShipmentResolver@updateStatus")
+
+    "3. Menghapus data pengiriman."
+    deleteShipment(id: ID!): Shipment @field(resolver: "App\\GraphQL\\Resolvers\\ShipmentResolver@deleteShipment")
+}

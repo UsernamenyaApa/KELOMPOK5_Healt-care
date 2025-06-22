@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { graphqlFetch } from '../utils/graphql';
+import { graphqlFetch, SHIPMENT_GQL } from '../utils/graphql';
 
 const MEDICINE_GQL = 'http://localhost:8004/graphql';
 
-const Medicine = ({ appointmentId, isDoctor, onPrescriptionAdded, isViewOnly = false }) => {
+const Medicine = ({ appointmentId, isDoctor, onPrescriptionAdded, isViewOnly = false, patientId }) => {
   const [medicines, setMedicines] = useState([]);
   const [draftPrescription, setDraftPrescription] = useState([]); // [{medicine_id, quantity}]
   const [displayPrescription, setDisplayPrescription] = useState([]); // hasil getReceipt
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [shipment, setShipment] = useState(null);
+  const [shipmentLoading, setShipmentLoading] = useState(false);
 
   // Ambil daftar obat
   useEffect(() => {
@@ -25,6 +27,27 @@ const Medicine = ({ appointmentId, isDoctor, onPrescriptionAdded, isViewOnly = f
       });
     }
   }, [appointmentId, successMsg]);
+
+  // Cek status pengiriman untuk appointment ini
+  useEffect(() => {
+    if (appointmentId && !isDoctor) {
+      setShipmentLoading(true);
+      const shipmentQuery = `query($orderId: ID!) { shipmentsByOrder(order_id: $orderId) { id tracking_number carrier status shipping_address estimated_delivery updates { status location description created_at } } }`;
+      
+      // Asumsikan appointment_id sama dengan order_id untuk demo
+      graphqlFetch(SHIPMENT_GQL, shipmentQuery, { orderId: appointmentId.toString() })
+        .then(data => {
+          if (data && data.shipmentsByOrder && data.shipmentsByOrder.length > 0) {
+            setShipment(data.shipmentsByOrder[0]);
+          }
+          setShipmentLoading(false);
+        })
+        .catch(err => {
+          console.error('Error fetching shipment:', err);
+          setShipmentLoading(false);
+        });
+    }
+  }, [appointmentId, isDoctor]);
 
   const handleAddToPrescription = (medicine_id) => {
     setDraftPrescription(prev => {
@@ -57,6 +80,38 @@ const Medicine = ({ appointmentId, isDoctor, onPrescriptionAdded, isViewOnly = f
       if (onPrescriptionAdded) onPrescriptionAdded();
     } catch (err) {
       setErrorMsg('Gagal menambahkan resep.');
+    }
+  };
+
+  const handleCreateShipment = async () => {
+    if (!patientId || !appointmentId) {
+      setErrorMsg('Data pasien atau appointment tidak lengkap');
+      return;
+    }
+
+    setShipmentLoading(true);
+    try {
+      const mutation = `
+        mutation($orderId: ID!, $userId: ID!) { 
+          createShipment(order_id: $orderId, user_id: $userId) { 
+            id tracking_number status estimated_delivery 
+          } 
+        }`;
+      
+      const result = await graphqlFetch(SHIPMENT_GQL, mutation, {
+        orderId: appointmentId.toString(),
+        userId: patientId.toString()
+      });
+      
+      if (result && result.createShipment) {
+        setShipment(result.createShipment);
+        setSuccessMsg('Pengiriman obat berhasil dibuat!');
+      }
+    } catch (err) {
+      console.error('Error creating shipment:', err);
+      setErrorMsg(`Gagal membuat pengiriman: ${err.message}`);
+    } finally {
+      setShipmentLoading(false);
     }
   };
 
@@ -104,6 +159,44 @@ const Medicine = ({ appointmentId, isDoctor, onPrescriptionAdded, isViewOnly = f
               {p.name} - {p.quantity} {p.pricePerUnit ? `(Rp${p.pricePerUnit} x ${p.quantity} = Rp${p.total})` : ''}
             </div>
           ))}
+          
+          {!isDoctor && !shipment && displayPrescription.length > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <button 
+                onClick={handleCreateShipment} 
+                disabled={shipmentLoading}
+                style={{ backgroundColor: '#4CAF50', color: 'white', padding: '10px 15px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                {shipmentLoading ? 'Memproses...' : 'Pesan Pengiriman Obat'}
+              </button>
+            </div>
+          )}
+          
+          {shipment && (
+            <div style={{ marginTop: 16, padding: 16, border: '1px solid #ddd', borderRadius: 8 }}>
+              <h4>Status Pengiriman Obat</h4>
+              <p><b>Nomor Tracking:</b> {shipment.tracking_number}</p>
+              <p><b>Status:</b> {shipment.status}</p>
+              {shipment.carrier && <p><b>Kurir:</b> {shipment.carrier}</p>}
+              {shipment.estimated_delivery && (
+                <p><b>Estimasi Tiba:</b> {new Date(shipment.estimated_delivery).toLocaleDateString('id-ID')}</p>
+              )}
+              {shipment.updates && shipment.updates.length > 0 && (
+                <div>
+                  <h5>Riwayat Status:</h5>
+                  <ul style={{ paddingLeft: 20 }}>
+                    {shipment.updates.map((update, idx) => (
+                      <li key={idx}>
+                        <b>{new Date(update.created_at).toLocaleString('id-ID')}</b> - {update.status}
+                        {update.location && ` di ${update.location}`}
+                        {update.description && <div>{update.description}</div>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

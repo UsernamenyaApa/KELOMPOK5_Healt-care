@@ -53,7 +53,7 @@ services:
       - db-patient
     environment:
       - DATABASE_URL=mysql+pymysql://root:password@db-patient:3306/patient_db
-      - RUN_SEEDER=false  # Ubah menjadi true jika ingin menjalankan seeder
+      - RUN_SEEDER=true  # Ubah menjadi true jika ingin menjalankan seeder
 
   doctor-service:
     build:
@@ -65,7 +65,7 @@ services:
       - db-doctor
     environment:
       - DATABASE_URL=mysql+pymysql://root:password@db-doctor:3306/doctor_db
-      - RUN_SEEDER=false  # Ubah menjadi true jika ingin menjalankan seeder
+      - RUN_SEEDER=true  # Ubah menjadi true jika ingin menjalankan seeder
 
   appointment-service:
     build:
@@ -79,7 +79,7 @@ services:
       - doctor-service
     environment:
       - DATABASE_URL=mysql+pymysql://root:password@db-appointment:3306/appointment_db
-      - RUN_SEEDER=false  # Ubah menjadi true jika ingin menjalankan seeder
+      - RUN_SEEDER=true  # Ubah menjadi true jika ingin menjalankan seeder
 
   medicine-service:
     build:
@@ -91,7 +91,7 @@ services:
       - db-medicine
     environment:
       - DATABASE_URL=mysql+pymysql://root:password@db-medicine:3306/medicine_db
-      - RUN_SEEDER=false  # Ubah menjadi true jika ingin menjalankan seeder
+      - RUN_SEEDER=true  # Ubah menjadi true jika ingin menjalankan seeder
 
   chat-service:
     build:
